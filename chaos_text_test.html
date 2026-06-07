@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Chaos Text Generator</title>
+  </head>
+
+  <body
+    style="
+      background: #111;
+      color: white;
+      font-family: sans-serif;
+      padding: 20px;
+    "
+  >
+    <h2>Chaos Text Generator</h2>
+
+    <p>문구 입력</p>
+    <textarea
+      id="inputText"
+      style="width: 100%; height: 120px; box-sizing: border-box"
+      placeholder="예: 글리치 텍스트 한 글자마다 튀어나가는 효과"
+    ></textarea>
+
+    <br /><br />
+
+    <button id="generateBtn" style="padding: 8px 16px">Generate</button>
+
+    <button id="copyBtn" style="padding: 8px 16px">Copy HTML</button>
+
+    <h3>미리보기</h3>
+    <div
+      id="preview"
+      style="
+        padding: 30px;
+        border: 1px solid #555;
+        min-height: 120px;
+        background: #000;
+      "
+    ></div>
+
+    <h3>복사용 HTML</h3>
+    <textarea
+      id="output"
+      style="width: 100%; height: 260px; box-sizing: border-box"
+      readonly
+    ></textarea>
+
+    <script>
+      const inputText = document.querySelector("#inputText");
+      const generateBtn = document.querySelector("#generateBtn");
+      const copyBtn = document.querySelector("#copyBtn");
+      const preview = document.querySelector("#preview");
+      const output = document.querySelector("#output");
+
+      const textShadow =
+        "1px 1px #ff2b2b," +
+        "-3px -3px #ff2b2b," +
+        "-6px 6px #c02bff," +
+        "9px -9px #24ff2b," +
+        "-12px 12px #0074f0";
+
+      generateBtn.addEventListener("click", () => {
+        const text = inputText.value;
+        const outputHtml = makeChaosText(text);
+
+        preview.innerHTML = outputHtml;
+        output.value = outputHtml;
+      });
+
+      copyBtn.addEventListener("click", async () => {
+        if (!output.value.trim()) {
+          alert("먼저 Generate를 눌러 HTML을 생성하세요.");
+          return;
+        }
+
+        await navigator.clipboard.writeText(output.value);
+        alert("HTML이 복사되었습니다.");
+      });
+
+      function makeChaosText(text) {
+        let html = "";
+
+        // 입력창의 엔터 줄바꿈을 인식
+        const parts = text.split(/(\r\n|\n|\r)/);
+
+        for (const part of parts) {
+          if (part.match(/\r\n|\n|\r/)) {
+            html += "<br>";
+            continue;
+          }
+
+          for (const char of part) {
+            const size = rand(12, 48);
+            const top = rand(-18, 18);
+            const left = rand(-8, 8);
+            const rotate = rand(-25, 25);
+
+            const safeChar = char === " " ? "&nbsp;" : escapeHtml(char);
+
+            html +=
+              `<span style="` +
+              `position:relative;` +
+              `display:inline-block;` +
+              `color:white;` +
+              `font-family:sans-serif;` +
+              `font-weight:bold;` +
+              `font-size:${size}pt;` +
+              `line-height:1.3;` +
+              `top:${top}px;` +
+              `left:${left}px;` +
+              `transform:rotate(${rotate}deg);` +
+              `text-shadow:${textShadow};` +
+              `">${safeChar}</span>`;
+          }
+        }
+
+        return html;
+      }
+
+      function rand(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      function escapeHtml(str) {
+        return str
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+    </script>
+  </body>
+</html>
